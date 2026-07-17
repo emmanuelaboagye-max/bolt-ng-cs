@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bolt NG — CS Ticket Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green:#34d186;--green-dark:#0a3d20;--green-light:#e8faf2;
+      --blue:#2563eb;--blue-light:#eff6ff;--blue-dark:#1d4ed8;
+      --red-light:#fef2f2;--red:#dc2626;
+      --amber-light:#fffbeb;--amber:#d97706;
+      --s1:#f9fafb;--s2:#f3f4f6;
+      --border:#e5e7eb;--bstrong:#d1d5db;
+      --text:#111827;--t2:#6b7280;--t3:#9ca3af;
+      --r:8px;--rl:12px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:var(--s1);color:var(--text);min-height:100vh}
+
+    .header{background:#fff;border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;gap:12px;height:56px;position:sticky;top:0;z-index:100}
+    .logo{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;flex-shrink:0}
+    .header h1{font-size:15px;font-weight:600}
+    .hbadge{background:var(--green-light);color:var(--green-dark);font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px}
+    .hright{margin-left:auto;display:flex;align-items:center;gap:10px}
+    .apist{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:5px}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+    .dot.off{background:var(--red)}
+
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:999}
+    .setup{background:#fff;border-radius:var(--rl);padding:2rem;width:420px;max-width:90vw}
+    .setup h2{font-size:16px;font-weight:600;margin-bottom:8px}
+    .setup p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:1rem}
+    .setup a{color:var(--blue)}
+    .setup input{width:100%;border:1px solid var(--bstrong);border-radius:var(--r);padding:9px 12px;font-size:13px;font-family:inherit;margin-bottom:10px}
+    .setup input:focus{outline:none;border-color:var(--blue)}
+    .snote{font-size:11px;color:var(--t3);text-align:center;margin-top:8px}
+
+    .bg{background:var(--green);color:var(--green-dark);border:none;border-radius:var(--r);padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;width:100%}
+    .bg:hover{background:#2bbf78}
+    .bg:disabled{opacity:.5;cursor:not-allowed}
+    .bo{background:transparent;border:1px solid var(--bstrong);border-radius:var(--r);padding:8px 14px;font-size:13px;color:var(--t2);cursor:pointer;font-family:inherit}
+    .bo:hover{background:var(--s2);color:var(--text)}
+
+    .main{max-width:960px;margin:0 auto;padding:1.5rem 1rem}
+
+    .trow{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+    .tlbl{font-size:13px;font-weight:500;color:var(--t2)}
+    .twrap{display:flex;border:1px solid var(--bstrong);border-radius:var(--r);overflow:hidden}
+    .tog{padding:7px 18px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--t2);font-family:inherit}
+    .tog.on{background:var(--green);color:var(--green-dark)}
+
+    .frow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1rem}
+    .fg label{display:block;font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+    select{width:100%;border:1px solid var(--bstrong);border-radius:var(--r);background:#fff;color:var(--text);font-family:inherit;font-size:13px;padding:8px 10px;height:36px;cursor:pointer}
+    select:focus{outline:none;border-color:var(--blue)}
+
+    .agrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+    .acard{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:1rem}
+    .albl{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .kba{font-size:10px;color:var(--green-dark);background:var(--green-light);padding:2px 7px;border-radius:10px;display:none}
+    textarea{width:100%;border:1px solid var(--border);border-radius:var(--r);background:var(--s1);color:var(--text);font-family:inherit;font-size:13px;line-height:1.6;padding:9px 11px;resize:vertical;min-height:130px}
+    textarea::placeholder{color:var(--t3)}
+    textarea:focus{outline:none;border-color:var(--blue)}
+
+    .arow{display:flex;gap:8px;margin-bottom:1.25rem}
+    .bgen{background:var(--green);color:var(--green-dark);border:none;border-radius:var(--r);padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px}
+    .bgen:hover{background:#2bbf78}
+    .bgen:disabled{opacity:.5;cursor:not-allowed}
+    .spin{display:none;width:15px;height:15px;border:2px solid rgba(10,61,32,.25);border-top-color:var(--green-dark);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .rcard{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;display:none}
+    .rcard.on{display:block}
+    .rhead{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+    .rtitle{font-size:15px;font-weight:600}
+    .pb{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+    .ph{background:var(--red-light);color:var(--red)}
+    .pm{background:var(--amber-light);color:var(--amber)}
+    .pl{background:var(--green-light);color:var(--green-dark)}
+    .ct{margin-left:auto;font-size:11px;color:var(--t3);background:var(--s2);padding:3px 9px;border-radius:20px}
+
+    .sec{margin-bottom:1rem}
+    .stitle{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+    .sbox{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:10px 13px;font-size:13px;color:var(--t2);font-style:italic;line-height:1.6}
+    .slist{list-style:none}
+    .slist li{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;line-height:1.55}
+    .slist li:last-child{border-bottom:none}
+    .snum{width:22px;height:22px;min-width:22px;background:var(--blue-light);color:var(--blue-dark);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:1px}
+    .dbox{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;font-size:13px;line-height:1.75;white-space:pre-wrap}
+    .crow{display:flex;justify-content:flex-end;margin-top:8px}
+    .div{height:1px;background:var(--border);margin:1rem 0}
+    .pnote{background:var(--amber-light);border:1px solid #fde68a;border-radius:var(--r);padding:9px 12px;font-size:12px;color:#92400e;display:flex;gap:7px;line-height:1.55}
+
+    .footer{text-align:center;padding:2rem 1rem 1rem;font-size:11px;color:var(--t3)}
+
+    @media(max-width:640px){
+      .frow{grid-template-columns:1fr}
+      .agrid{grid-template-columns:1fr}
+      .ct{margin-left:0}
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="ov">
+  <div class="setup">
+    <h2>🔑 Enter your API key</h2>
+    <p>This tool uses the Anthropic API. Your key is saved only in this browser and never sent anywhere except Anthropic.</p>
+    <p>Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
+    <input type="password" id="kin" placeholder="sk-ant-..." />
+    <button class="bg" onclick="saveKey()">Save and continue</button>
+    <p class="snote">Your key stays on this device only.</p>
+  </div>
+</div>
+
+<header class="header">
+  <div class="logo">B</div>
+  <h1>CS Ticket Assistant</h1>
+  <span class="hbadge">Nigeria · Rider & Driver</span>
+  <div class="hright">
+    <div class="apist"><div class="dot" id="dot"></div><span id="dotlbl">API ready</span></div>
+    <button class="bo" onclick="resetKey()" style="font-size:11px;padding:5px 10px">Change API key</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="trow">
+    <span class="tlbl">Contact type:</span>
+    <div class="twrap">
+      <button class="tog on" id="rBtn" onclick="setMode('rider')">🚕 Rider</button>
+      <button class="tog" id="dBtn" onclick="setMode('driver')">🚗 Driver</button>
+    </div>
+  </div>
+
+  <div class="frow">
+    <div class="fg"><label>Topic / Category</label>
+      <select id="cat" onchange="fillReasons()"><option value="">Select topic</option></select>
+    </div>
+    <div class="fg"><label>Issue tag</label>
+      <select id="reason" onchange="loadKB()"><option value="">Select topic first</option></select>
+    </div>
+    <div class="fg"><label>Channel</label>
+      <select id="ch">
+        <option>Email</option><option>Live chat</option><option>WhatsApp</option>
+        <option>Social media</option><option>Phone (transcribed)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="agrid">
+    <div class="acard">
+      <div class="albl">📩 Customer ticket</div>
+      <textarea id="ticket" placeholder="Paste the customer's message here…"></textarea>
+    </div>
+    <div class="acard">
+      <div class="albl">📖 Knowledge base / policy <span class="kba" id="kba">Auto-loaded</span></div>
+      <textarea id="kb" placeholder="Select an issue tag to auto-load KB content, or paste manually…"></textarea>
+    </div>
+  </div>
+
+  <div class="arow">
+    <button class="bgen" id="genBtn" onclick="generate()">
+      ✦ Generate response <div class="spin" id="spin"></div>
+    </button>
+    <button class="bo" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div class="rcard" id="rc">
+    <div class="rhead">
+      <span>✅</span>
+      <span class="rtitle">Recommended resolution</span>
+      <span class="pb" id="pb"></span>
+      <span class="ct" id="ct"></span>
+    </div>
+    <div class="sec"><div class="stitle">🔍 Issue summary</div><div class="sbox" id="isum"></div></div>
+    <div class="div"></div>
+    <div class="sec"><div class="stitle">✅ Resolution steps</div><ul class="slist" id="steps"></ul></div>
+    <div class="div"></div>
+    <div class="sec">
+      <div class="stitle">💬 Draft response to customer</div>
+      <div class="dbox" id="draft"></div>
+      <div class="crow"><button class="bo" onclick="copyDraft(event)">📋 Copy response</button></div>
+    </div>
+    <div class="pnote">⚠️ <span id="pnote"></span></div>
+  </div>
+</main>
+
+<footer class="footer">Bolt Nigeria · CS Ticket Assistant · Internal use only</footer>
+
+<script>
+const DB={
+  rider:{
+    "Account":["I want to change my phone number","My age or date of birth is incorrect in the app","I want to delete my order history","I want to unsubscribe from emails/SMS","My unsubscribe link does not work","I want to know more about my Rider rating","I want to know why my Rider rating dropped","I want to increase my Rider rating","I want to delete my account","I want to report driver fraud","I noticed suspicious activity on my account","I have a verification issue","Verification is taking too long","I have a question about verification","I want to request my order history","I want to request my personal data","I want to request information about my driver","I can't sign in","I have an issue with a family profile","My account has been blocked","I want to delete my personal data","I want to object to the use of my personal data","I can't register an account"],
+    "Application":["I can't contact my driver","I can't send an attachment via my app","I have a technical issue with the app","My Bolt app crashed or froze","I experienced an error in the app","I can't contact Customer Support","I can't rate the trip","I have a suggestion about Bolt","I'm unhappy with the Customer Support","I have a question about trusted contacts"],
+    "Lost items":["I lost a personal item","I lost my phone"],
+    "Payments":["I have a question about the price calculation","Bolt prices are too high","I was charged more than expected","I was charged unfair wait time fee","I didn't receive change for my payment","I was wrongly charged a cancellation fee","I have an unrecognised charge","My pre-authorisation wasn't released","I was charged twice for my order","I have a question about tips","I want to revoke my tip","I want to change my payment method","I want to add a payment method","I want to remove a payment method","My payment failed","I have a problem with my business payment method","I didn't receive an invoice","I didn't receive my work profile invoice","I didn't receive my work profile monthly report","My invoice has incorrect data","My work profile invoice has incorrect data","I have a question about Bolt/Hopp Balance","I want to top-up my Bolt/Hopp Balance","My top-up doesn't show on Bolt/Hopp Balance","I want to withdraw my funds from Bolt/Hopp Balance","I have negative Bolt/Hopp Balance","I want to get a refund to my payment method","I didn't receive a promised refund","My promotion wasn't applied","I have a question about a promotion","I want to cancel my Bolt Plus subscription","I have a question about Bolt Plus"],
+    "Service Quality":["There were no available cars for my order","There was no available category for my trip","Finding a driver for my order took too long","Car didn't match description in the app","I can't order a trip","My driver didn't show up","My driver refused to wait for me","My driver refused to pick me up","My driver arrived at a wrong pick-up location","My pick-up time was longer than estimate","My driver marked arrival too early","My driver asked to cancel the ride","My ride happened without me","My driver didn't start a trip on time","My driver refused or didn't help with luggage","I have an issue with the scheduled trip","My driver charged cash upfront","My driver made an unnecessary stop","I wasn't dropped off at my destination","My driver refused to make a requested stop","I have an issue with a delivery category order","My driver took a poor route","My driver asked for cash instead of in-app payment","My driver didn't finish the trip on time","Experience with driver didn't meet my expectations","My driver was impolite","Driver didn't answer my calls","My driver was inexperienced","I want to report bad vehicle condition","My driver does not display required ID","The vehicle broke down during the trip","The vehicle is dirty or smelled","My vehicle misses taxicab markings","My driver refused to turn on/off the air conditioner"],
+    "Support & Product quality":["I want to report a security vulnerability"],
+    "Unclassified":["Spam"]
+  },
+  driver:{
+    "Acceptance rate":["My Acceptance Rate is calculated unfairly","I have a question about my Acceptance Rate"],
+    "Account access":["My account is suspended unfairly","I want to know why my account is suspended","I want to know when my account suspension will be lifted","I have a question about warning or suspension","I have a question about trusted contacts","I can't sign in"],
+    "Account":["I want to change my phone number","I want to change my banking details","I have a question about profile types","I want to change my profile picture","I want to change my name form in the account"],
+    "Account deletion":["I want to delete my account"],
+    "Bolt tariffs":["Bolt/Hopp tariffs don't meet my expectations","I have a question about Bolt/Hopp tariffication system","I have a question about the price bidding"],
+    "Branding bonus":["I want to report a car branding being damaged","I want to register for the Branding program","I want to know if I'm eligible for the branding bonus","I have a question about Bolt/Hopp branding","I didn't receive a branding enrolment message","I didn't receive my branding bonus"],
+    "Cancellation fee":["I didn't receive a cancellation fee"],
+    "Commission":["I want to know how to pay commission to Bolt/Hopp","I have a question about driver debt","I have a question about commission rates","A paid commission debt didn't update in Driver Balance"],
+    "Different rider":["Rider was not the same as shown in the app","I mistakenly picked up a wrong rider"],
+    "Driver Balance":["My earnings weren't added to my Driver Balance","I want to request my Bolt/Hopp account balance statement","I have a question about my Driver balance"],
+    "Driver score":["My Driver Score is calculated unfairly","I have a question about my Driver Score"],
+    "Early Cashout withdrawal":["My Early Cashout was calculated incorrectly","I'm unable to request an Early Cashout","I didn't receive my Early Cashout"],
+    "Editing account details":["My unsubscribe link does not work","I want to unsubscribe from emails/SMS","I want to enable or disable a payment method","I want to change my profile picture"],
+    "Engagement Center":["I have a question about the Driver Engagement Center"],
+    "Fleet":["I want to start operating independently from my fleet","I want to start operating in another city","I want to change my fleet","I want to be removed from my fleet","I have a question about fleets"],
+    "GDPR":["I want to request my personal data","I want to request my order history","I want to request information about my rider","I want to request an affiliation letter","I want to object to the use of my personal data","I want to delete my personal data","I want to delete my order history"],
+    "Invoices & Receipts":["I want to request an invoice","I have question about my earnings report","I didn't receive my invoice"],
+    "Lost items":["I found an item in the vehicle"],
+    "Low final fare":["Toll fee wasn't added to my final fare","Parking fee wasn't added to my final fare","My order price was miscalculated","I have a question about the wait time fee"],
+    "Other Campaigns & Bonuses":["I want to know if I'm eligible for a bonus","I have a question about Bolt Rewards","I have a question about a bonus or campaign","I didn't receive my bonus or campaign"],
+    "Payout withdrawal":["My payout was calculated incorrectly","I have a question about my payout","I didn't receive my payout"],
+    "Pick-up experience":["My rider didn't show up","My rider cancelled an order","I have an issue with the scheduled trip"],
+    "Pre-order experience":["I received an order outside my radius","I don't receive orders in the surge area","I don't receive orders"],
+    "Ratings":["I have a question about my rating"],
+    "Reclassification (internal)":["Partner employment query"],
+    "Rider interaction with an app":["My rider chose incorrect vehicle category","My rider chose incorrect pick-up location","My rider chose incorrect drop-off location","A ride was ordered for more riders than allowed"],
+    "Rider quality":["Rider made a mess in my car","My rider was under the influence of alcohol","My rider was drinking or eating in the vehicle","My rider smelled inappropriately","My rider behaved inappropriately","I want to report rider fraud","I have an issue with a delivery category order"],
+    "Riders' perks":["I have a question about Bolt Plus","I have a question about the rider's promotion"],
+    "Service reliability":["I'm unable to contact my rider","I have an issue with the driver guidance","I have a technical issue with the app","I have a problem with the app's map or navigation","I can't send an attachment via my app","I can't find messages from Bolt/Hopp in my app","I can't contact Customer Support"],
+    "Support & Product quality":["I'm unhappy with the Customer Support","I want to report a security vulnerability","I have a suggestion about Bolt/Hopp"],
+    "Suspicious activity":["My vehicle is used in another account","I noticed suspicious activity on my account"],
+    "Tips":["My tips weren't added to my balance","I have a question about driver tips"],
+    "Unpaid trips":["Rider didn't pay the full price of their trip","Rider didn't pay for their trip"],
+    "Vehicle details":["My vehicle details are incorrect","I want to remove a vehicle category","I want to remove a vehicle","I want to know the status of my vehicle application","I want to add a vehicle","I want to add a new vehicle category","I have a technical problem with my vehicle"],
+    "Verification":["Verification is taking too long","I have a verification issue","I have a question about verification"],
+    "Unclassified":["Spam"]
+  }
+};
+
+const KB={rider:{},driver:{}};
+
+let mode='rider';
+
+function getKey(){return localStorage.getItem('bng_key')||'';}
+function saveKey(){
+  const k=document.getElementById('kin').value.trim();
+  if(!k.startsWith('sk-ant-')){alert('Please enter a valid Anthropic API key (starts with sk-ant-).');return;}
+  localStorage.setItem('bng_key',k);
+  document.getElementById('ov').style.display='none';
+  setDot(true);
+}
+function resetKey(){
+  localStorage.removeItem('bng_key');
+  document.getElementById('kin').value='';
+  document.getElementById('ov').style.display='flex';
+  setDot(false);
+}
+function setDot(ok){
+  document.getElementById('dot').className='dot'+(ok?'':' off');
+  document.getElementById('dotlbl').textContent=ok?'API ready':'No API key';
+}
+
+window.addEventListener('load',()=>{
+  if(getKey()){document.getElementById('ov').style.display='none';setDot(true);}
+  setMode('rider');
+});
+
+function setMode(m){
+  mode=m;
+  document.getElementById('rBtn').classList.toggle('on',m==='rider');
+  document.getElementById('dBtn').classList.toggle('on',m==='driver');
+  const cat=document.getElementById('cat');
+  cat.innerHTML='<option value="">Select topic</option>';
+  Object.keys(DB[m]).sort().forEach(k=>{
+    const o=document.createElement('option');o.value=k;o.textContent=k;cat.appendChild(o);
+  });
+  document.getElementById('reason').innerHTML='<option value="">Select topic first</option>';
+  document.getElementById('kb').value='';
+  document.getElementById('kba').style.display='none';
+  document.getElementById('rc').classList.remove('on');
+}
+
+function fillReasons(){
+  const cat=document.getElementById('cat').value;
+  const sel=document.getElementById('reason');
+  sel.innerHTML='';
+  if(!cat){sel.innerHTML='<option value="">Select topic first</option>';return;}
+  (DB[mode][cat]||[]).forEach(r=>{
+    const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o);
+  });
+  loadKB();
+}
+
+function loadKB(){
+  const r=document.getElementById('reason').value;
+  const content=(KB[mode]||{})[r];
+  const f=document.getElementById('kb');
+  const l=document.getElementById('kba');
+  if(content){f.value=content;l.style.display='inline';}
+  else{f.value='';l.style.display='none';}
+}
+
+async function generate(){
+  const key=getKey();
+  if(!key){alert('Please enter your API key first.');resetKey();return;}
+  const ticket=document.getElementById('ticket').value.trim();
+  const kb=document.getElementById('kb').value.trim();
+  const cat=document.getElementById('cat').value;
+  const reason=document.getElementById('reason').value;
+  const channel=document.getElementById('ch').value;
+  if(!ticket){alert('Please paste the customer ticket before generating.');return;}
+
+  const btn=document.getElementById('genBtn');
+  const spin=document.getElementById('spin');
+  btn.disabled=true;spin.style.display='block';
+  document.getElementById('rc').classList.remove('on');
+
+  const salutation=mode==='rider'?'Rider':'Driver-Partner';
+  const persona=mode==='rider'?'rider':'driver-partner';
+
+  const prompt=`You are a senior Bolt Nigeria customer service quality coach. Help an agent craft a precise, policy-aligned response for a ${persona} ticket.
+
+TICKET DETAILS:
+- User type: ${mode==='rider'?'Rider':'Driver-partner'}
+- Topic: ${cat||'General'}
+- Issue tag: ${reason||'Not specified'}
+- Channel: ${channel}
+- Message: ${ticket}
+${kb?`\nKNOWLEDGE BASE / POLICY:\n${kb}`:''}
+
+Respond ONLY with a valid JSON object. No markdown, no backticks, no extra text before or after:
+{"issueSummary":"One concise sentence summarising the core problem","priority":"High|Medium|Low","steps":["Step 1","Step 2","Step 3"],"draftResponse":"Full professional response. Warm respectful Nigerian CS tone. Open: Dear [${salutation} Name],. Close: Warm regards,\\nBolt Nigeria Support Team. Channel: ${channel}.","policyNote":"One internal compliance or escalation note for the agent only."}
+
+Rules: 3-5 clear agent steps. Escalate for fraud, suspicious activity, suspension disputes, security issues, or safety. For earnings/balance queries include a balance verification step.`;
+
+  try{
+    const res=await fetch('/.netlify/functions/proxy',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt,apiKey:key})
+    });
+
+    if(!res.ok){
+      const e=await res.json().catch(()=>({}));
+      if(res.status===401){alert('Invalid API key. Please re-enter.');resetKey();return;}
+      throw new Error(e?.error||`Server error ${res.status}`);
+    }
+
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||'';
+    const p=JSON.parse(text.replace(/```json|```/g,'').trim());
+
+    document.getElementById('isum').textContent=p.issueSummary||'';
+    document.getElementById('steps').innerHTML=(p.steps||[]).map((s,i)=>
+      `<li><div class="snum">${i+1}</div><div>${s}</div></li>`).join('');
+    document.getElementById('draft').textContent=p.draftResponse||'';
+    document.getElementById('pnote').textContent=p.policyNote||'';
+
+    const pri=p.priority||'Medium';
+    const pb=document.getElementById('pb');
+    pb.textContent=pri+' priority';
+    pb.className='pb '+(pri==='High'?'ph':pri==='Low'?'pl':'pm');
+    document.getElementById('ct').textContent=
+      (mode==='rider'?'Rider':'Driver')+(cat?' · '+cat:'')+(reason?' · '+reason:'');
+
+    document.getElementById('rc').classList.add('on');
+    document.getElementById('rc').scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  }catch(e){
+    alert('Error: '+e.message+'. Please try again.');
+  }finally{
+    btn.disabled=false;spin.style.display='none';
+  }
+}
+
+function copyDraft(e){
+  navigator.clipboard.writeText(document.getElementById('draft').textContent).then(()=>{
+    const b=e.target.closest('button');
+    b.textContent='✅ Copied!';
+    setTimeout(()=>{b.textContent='📋 Copy response';},2000);
+  });
+}
+
+function clearAll(){
+  document.getElementById('ticket').value='';
+  document.getElementById('kb').value='';
+  document.getElementById('cat').value='';
+  document.getElementById('reason').innerHTML='<option value="">Select topic first</option>';
+  document.getElementById('kba').style.display='none';
+  document.getElementById('rc').classList.remove('on');
+}
+</script>
+</body>
+</html>
